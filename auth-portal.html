@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="StrathShare - Login or Register to access the peer-to-peer skill sharing platform">
+    <title>StrathShare - Login</title>
+    <style>
+        /* AUTH PORTAL STYLES */
+        :root {
+            --bg-primary: #0a0a14;
+            --bg-secondary: #12121e;
+            --bg-card: #16162a;
+            --pink: #ff2d55;
+            --pink-soft: #ff5b7c;
+            --pink-gradient: linear-gradient(135deg, #ff2d55, #ff5b7c);
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0c0;
+            --text-muted: #6c6c80;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-light: rgba(255, 255, 255, 0.15);
+            --success: #28a745;
+            --error: #dc3545;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 45, 85, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 45, 85, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--pink-gradient);
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 15px;
+            box-shadow: 0 8px 30px rgba(255, 45, 85, 0.3);
+        }
+
+        .logo h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .auth-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 35px;
+            border: 1px solid var(--border-subtle);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 5px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .tab.active {
+            background: var(--pink-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 45, 85, 0.3);
+        }
+
+        .tab:not(.active):hover {
+            color: var(--text-primary);
+        }
+
+        .form-container {
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--pink);
+            box-shadow: 0 0 0 3px rgba(255, 45, 85, 0.15);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 6px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: var(--pink-gradient);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(255, 45, 85, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            color: #ff6b6b;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            color: #51cf66;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .password-requirements {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+
+        .password-requirements p {
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+            color: var(--text-muted);
+        }
+
+        .requirement.valid {
+            color: var(--success);
+        }
+
+        .requirement .icon {
+            font-size: 0.9rem;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border-subtle);
+        }
+
+        .divider span {
+            background: var(--bg-card);
+            padding: 0 15px;
+            position: relative;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 25px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer-text a {
+            color: var(--pink);
+            text-decoration: none;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 25px 20px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .logo h1 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="logo">
+            <div class="logo-icon">🎓</div>
+            <h1>StrathShare</h1>
+            <p>Peer-to-Peer Skill Sharing for Strathmore Students</p>
+        </div>
+
+        <div class="auth-card">
+            <div class="tabs">
+                <div class="tab active" onclick="showForm('login')">Login</div>
+                <div class="tab" onclick="showForm('register')">Register</div>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm" class="form-container active">
+                <div id="loginError" class="error-message"></div>
+                <div id="loginSuccess" class="success-message"></div>
+                
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="loginEmail">Email Address</label>
+                        <input type="email" id="loginEmail" placeholder="yourname@strathmore.edu" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary" id="loginBtn">Login</button>
+                </form>
+                
+                <div class="footer-text">
+                    <p>Don't have an account? <a href="#" onclick="showForm('register')">Register here</a></p>
+                </div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" class="form-container">
+                <div id="registerError" class="error-message"></div>
+                <div id="registerSuccess" class="success-message"></div>
+                
+                <form onsubmit="handleRegister(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" placeholder="Sean" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" placeholder="Sabana" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerEmail">Strathmore Email</label>
+                        <input type="email" id="registerEmail" placeholder="yourname@strathmore.edu" required>
+                        <small>Must be a valid @strathmore.edu email</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" placeholder="0712345678" required>
+                        <small>Kenyan phone number (for M-Pesa)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerPassword">Password</label>
+                        <input type="password" id="registerPassword" placeholder="Create a strong password" required oninput="checkPassword()">
+                        
+                        <div class="password-requirements">
+                            <p>Password must have:</p>
+                            <div class="requirement" id="req-length">
+                                <span class="icon">○</span> At least 6 characters
+                            </div>
+                            <div class="requirement" id="req-upper">
+                                <span class="icon">○</span> One uppercase letter
+                            </div>
+                            <div class="requirement" id="req-lower">
+                                <span class="icon">○</span> One lowercase letter
+                            </div>
+                            <div class="requirement" id="req-special">
+                                <span class="icon">○</span> One special character
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary" id="registerBtn">Create Account</button>
+                </form>
+                
+                <div class="footer-text">
+                    <p>Already have an account? <a href="#" onclick="showForm('login')">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================
+        // AUTHENTICATION JAVASCRIPT
+        // SEAN & DAVID — FINAL VERSION 2025
+        // =====================================================
+        
+        const API_BASE = 'api/';
+
+        // Check if already logged in
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = localStorage.getItem('currentUser');
+            if (user) {
+                const userData = JSON.parse(user);
+                if (userData.is_admin) {
+                    window.location.href = 'admin-dashboard.html';
+                } else {
+                    window.location.href = 'student-dashboard.html';
+                }
+            }
+        });
+
+        // Tab switching
+        function showForm(formType) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.form-container').forEach(form => form.classList.remove('active'));
+            
+            if (formType === 'login') {
+                document.querySelector('.tab:first-child').classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                document.querySelector('.tab:last-child').classList.add('active');
+                document.getElementById('registerForm').classList.add('active');
+            }
+            
+            // Clear messages
+            hideMessages();
+        }
+
+        function hideMessages() {
+            document.querySelectorAll('.error-message, .success-message').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+
+        function showError(elementId, message) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.style.display = 'block';
+        }
+
+        function showSuccess(elementId, message) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.style.display = 'block';
+        }
+
+        // Password validation
+        function checkPassword() {
+            const password = document.getElementById('registerPassword').value;
+            
+            const requirements = {
+                'req-length': password.length >= 6,
+                'req-upper': /[A-Z]/.test(password),
+                'req-lower': /[a-z]/.test(password),
+                'req-special': /[^A-Za-z0-9]/.test(password)
+            };
+            
+            for (const [id, valid] of Object.entries(requirements)) {
+                const el = document.getElementById(id);
+                if (valid) {
+                    el.classList.add('valid');
+                    el.querySelector('.icon').textContent = '✓';
+                } else {
+                    el.classList.remove('valid');
+                    el.querySelector('.icon').textContent = '○';
+                }
+            }
+            
+            return Object.values(requirements).every(v => v);
+        }
+
+        // Login handler
+        async function handleLogin(event) {
+            event.preventDefault();
+            hideMessages();
+            
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const btn = document.getElementById('loginBtn');
+            
+            // Validate email domain
+            if (!email.endsWith('@strathmore.edu')) {
+                showError('loginError', 'Please use your @strathmore.edu email address');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Logging in...';
+            
+            try {
+                const response = await fetch(`${API_BASE}login.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Store user data
+                    localStorage.setItem('currentUser', JSON.stringify(data.user));
+                    
+                    showSuccess('loginSuccess', 'Login successful! Redirecting...');
+                    
+                    setTimeout(() => {
+                        if (data.user.is_admin) {
+                            window.location.href = 'admin-dashboard.html';
+                        } else {
+                            window.location.href = 'student-dashboard.html';
+                        }
+                    }, 1000);
+                } else {
+                    showError('loginError', data.message || 'Invalid email or password');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('loginError', 'Connection error. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Login';
+            }
+        }
+
+        // Register handler
+        async function handleRegister(event) {
+            event.preventDefault();
+            hideMessages();
+            
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const btn = document.getElementById('registerBtn');
+            
+            // Validations
+            if (!email.endsWith('@strathmore.edu')) {
+                showError('registerError', 'Please use your @strathmore.edu email address');
+                return;
+            }
+            
+            // Validate Kenyan phone number
+            let cleanPhone = phone.replace(/[^0-9]/g, '');
+            if (cleanPhone.startsWith('0')) {
+                cleanPhone = '254' + cleanPhone.substring(1);
+            }
+            if (!/^254[0-9]{9}$/.test(cleanPhone)) {
+                showError('registerError', 'Please enter a valid Kenyan phone number');
+                return;
+            }
+            
+            if (!checkPassword()) {
+                showError('registerError', 'Password does not meet requirements');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showError('registerError', 'Passwords do not match');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Creating account...';
+            
+            try {
+                const response = await fetch(`${API_BASE}register.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        first_name: firstName,
+                        last_name: lastName,
+                        email: email,
+                        phone_number: cleanPhone,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess('registerSuccess', 'Account created successfully! Redirecting to login...');
+                    
+                    setTimeout(() => {
+                        showForm('login');
+                        document.getElementById('loginEmail').value = email;
+                    }, 2000);
+                } else {
+                    showError('registerError', data.message || 'Registration failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showError('registerError', 'Connection error. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Create Account';
+            }
+        }
+    </script>
+</body>
+</html>

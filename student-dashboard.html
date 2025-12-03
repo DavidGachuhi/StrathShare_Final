@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<!-- =====================================================
+     STRATHSHARE - Student Dashboard
+     Sean Sabana (220072) & David Mucheru Gachuhi (220235)
+     Strathmore University - December 2025
+     =====================================================
+     SEAN & DAVID — FINAL VERSION 2025 -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="StrathShare - Peer-to-Peer Skill Sharing Platform for Strathmore University Students">
+    <meta name="author" content="Sean Sabana & David Mucheru Gachuhi">
+    <title>StrathShare - Student Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            
+        <div class="sidebar-header">
+            <a href="index.html" class="logo" 
+            style="text-decoration:none; color:white; display:flex; align-items:center; gap:8px;">
+                <div class="logo-icon">🎓</div>
+                <span>StrathShare</span>
+            </a>
+        </div>
+
+            <div class="nav-tabs">
+                <div class="nav-tab active" data-view="discover">
+                    <span class="icon">🔥</span>
+                    <span>Discover</span>
+                </div>
+                <div class="nav-tab" data-view="browse">
+                    <span class="icon">📚</span>
+                    <span>Browse Services</span>
+                </div>
+                <div class="nav-tab" data-view="post">
+                    <span class="icon">💼</span>
+                    <span>Offer Services</span>
+                </div>
+                <div class="nav-tab" data-view="request">
+                    <span class="icon">🙋</span>
+                    <span>Request Help</span>
+                </div>
+                <div class="nav-tab" data-view="messages">
+                    <span class="icon">💬</span>
+                    <span>Messages</span>
+                </div>
+                <div class="nav-tab" data-view="profile">
+                    <span class="icon">👤</span>
+                    <span>My Profile</span>
+                </div>
+                <div class="nav-tab" data-view="settings">
+                    <span class="icon">⚙️</span>
+                    <span>Settings</span>
+                </div>
+            </div>  
+            
+                <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar" id="userAvatar"></div>
+                <div class="user-info">
+                    <div id="userName">Loading...</div>
+                    <div id="userEmail">Loading...</div>
+                </div>
+            </div>
+
+        </div>
+
+        </nav>
+        
+        <!-- Main Content Area -->
+
+        <main class="main-content" id="mainContent">
+            <!-- Content will be dynamically loaded by JavaScript -->
+            <div class="loading">Loading StrathShare...</div>
+        </main>
+        
+    </div>
+    
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+    
+    <script src="app.js"></script>
+    <script>
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            document.querySelector('.sidebar').classList.toggle('open');
+        }
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            const sidebar = document.querySelector('.sidebar');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(e.target) && 
+                !toggle.contains(e.target) &&
+                sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+        });
+    </script>
+    
+</body>
+</html>
