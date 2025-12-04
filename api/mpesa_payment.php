@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ===================================================================
  * STRATHSHARE - M-PESA PAYMENT INTEGRATION
@@ -36,7 +37,7 @@ require_once '../includes/EmailNotifier.php';
 // ===================================================================
 
 // DEMO MODE - Set to false to use real M-Pesa API
-define('MPESA_DEMO_MODE', false);
+define('MPESA_DEMO_MODE', true);
 
 // Daraja API Credentials (Get from https://developer.safaricom.co.ke/)
 define('MPESA_CONSUMER_KEY', '4fG1aQnGeRzR7vpPiXAFv02jyHsSwtcadRVCsZeWJmVKcCEM');
@@ -89,7 +90,7 @@ $phone_number = sanitizePhoneNumber($input['phone_number']);
 // Validate phone number format
 if (!preg_match('/^254[0-9]{9}$/', $phone_number)) {
     echo json_encode([
-        'success' => false, 
+        'success' => false,
         'message' => 'Invalid phone number. Use format: 254XXXXXXXXX'
     ]);
     exit();
@@ -104,7 +105,7 @@ if ($amount < 1) {
 try {
     $database = new Database();
     $db = $database->getConnection();
-    
+
     // Verify request exists and is awaiting payment
     $check_query = "SELECT r.*, 
                            seeker.first_name as seeker_fname, seeker.last_name as seeker_lname, seeker.user_email as seeker_email,
@@ -116,24 +117,24 @@ try {
     $check_stmt = $db->prepare($check_query);
     $check_stmt->bindParam(':request_id', $request_id);
     $check_stmt->execute();
-    
+
     if ($check_stmt->rowCount() === 0) {
         echo json_encode(['success' => false, 'message' => 'Request not found']);
         exit();
     }
-    
+
     $request = $check_stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     if ($request['status'] !== 'awaiting_payment') {
         echo json_encode(['success' => false, 'message' => 'Request is not awaiting payment']);
         exit();
     }
-    
+
     if ($request['seeker_id'] != $payer_id) {
         echo json_encode(['success' => false, 'message' => 'Only the seeker can make payment']);
         exit();
     }
-    
+
     // Create transaction record
     $trans_query = "INSERT INTO transactions 
                     (request_id, payer_id, receiver_id, amount, payment_method, status, mpesa_phone_number)
@@ -145,18 +146,17 @@ try {
     $trans_stmt->bindParam(':amount', $amount);
     $trans_stmt->bindParam(':phone', $phone_number);
     $trans_stmt->execute();
-    
+
     $transaction_id = $db->lastInsertId();
-    
+
     // Process payment (Demo or Real)
     if (MPESA_DEMO_MODE) {
         $result = processDemoPayment($db, $transaction_id, $request_id, $amount, $phone_number, $request);
     } else {
         $result = processRealMpesaPayment($db, $transaction_id, $amount, $phone_number);
     }
-    
+
     echo json_encode($result);
-    
 } catch (PDOException $e) {
     error_log("M-Pesa payment error: " . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Database error occurred']);
@@ -166,16 +166,17 @@ try {
 // DEMO PAYMENT PROCESSING
 // ===================================================================
 
-function processDemoPayment($db, $transaction_id, $request_id, $amount, $phone_number, $request) {
+function processDemoPayment($db, $transaction_id, $request_id, $amount, $phone_number, $request)
+{
     // Generate demo M-Pesa receipt
     $mpesa_receipt = 'DEMO' . strtoupper(substr(md5(time() . $transaction_id), 0, 10));
-    
+
     // Simulate processing delay (would be instant in real scenario)
     // In frontend, we'll show a popup for 10 seconds
-    
+
     try {
         $db->beginTransaction();
-        
+
         // Update transaction to completed
         $update_trans = "UPDATE transactions 
                         SET status = 'completed', 
@@ -186,41 +187,47 @@ function processDemoPayment($db, $transaction_id, $request_id, $amount, $phone_n
         $stmt->bindParam(':receipt', $mpesa_receipt);
         $stmt->bindParam(':trans_id', $transaction_id);
         $stmt->execute();
-        
+
         // Update request to completed
         $update_request = "UPDATE requests 
-                          SET status = 'completed', completed_at = NOW()
-                          WHERE request_id = :request_id";
+                  SET status = 'completed', updated_at = NOW()
+                  WHERE request_id = :request_id";
+
         $stmt2 = $db->prepare($update_request);
         $stmt2->bindParam(':request_id', $request_id);
         $stmt2->execute();
-        
-        // Create notification for provider (payment received)
+
+        // Provider notification – payment received
         $notif_query = "INSERT INTO notifications 
                         (user_id, type, title, message, reference_id, reference_type)
                         VALUES (:user_id, 'payment_received', 'Payment Received! 💰', :message, :ref_id, 'transaction')";
         $notif_stmt = $db->prepare($notif_query);
         $notif_stmt->bindParam(':user_id', $request['provider_id']);
-        $message = "You received KES " . number_format($amount, 2) . " from " . $request['seeker_fname'] . " for: " . $request['title'];
+        $message = "You received KES " . number_format($amount, 2) .
+            " from " . $request['seeker_fname'] . " for: " . $request['title'];
         $notif_stmt->bindParam(':message', $message);
         $notif_stmt->bindParam(':ref_id', $transaction_id);
         $notif_stmt->execute();
-        
-        // Create notification for seeker (payment sent)
-        $notif_stmt2 = $db->prepare($notif_query);
+
+        // Seeker notification – payment sent
+        $notif_query2 = "INSERT INTO notifications 
+                        (user_id, type, title, message, reference_id, reference_type)
+                        VALUES (:user_id, 'payment_sent', 'Payment Sent ✅', :message, :ref_id, 'transaction')";
+        $notif_stmt2 = $db->prepare($notif_query2);
         $notif_stmt2->bindParam(':user_id', $request['seeker_id']);
-        $message2 = "Your payment of KES " . number_format($amount, 2) . " to " . $request['provider_fname'] . " was successful.";
-        $notif_stmt2->bindValue(':type', 'payment_sent');
+        $message2 = "Your payment of KES " . number_format($amount, 2) .
+            " to " . $request['provider_fname'] . " was successful.";
         $notif_stmt2->bindParam(':message', $message2);
         $notif_stmt2->bindParam(':ref_id', $transaction_id);
         $notif_stmt2->execute();
-        
+
+
         $db->commit();
-        
+
         // Send email notifications
         try {
             $emailer = getEmailNotifier();
-            
+
             // Email to provider
             $emailer->sendPaymentReceivedNotification(
                 $request['provider_email'],
@@ -230,7 +237,7 @@ function processDemoPayment($db, $transaction_id, $request_id, $amount, $phone_n
                 $amount,
                 $mpesa_receipt
             );
-            
+
             // Email to seeker
             $emailer->sendPaymentConfirmationNotification(
                 $request['seeker_email'],
@@ -244,10 +251,10 @@ function processDemoPayment($db, $transaction_id, $request_id, $amount, $phone_n
             error_log("Email notification error: " . $e->getMessage());
             // Don't fail the transaction if email fails
         }
-        
+
         // Log the demo payment
         logPayment($transaction_id, $phone_number, $amount, $mpesa_receipt, 'completed', true);
-        
+
         return [
             'success' => true,
             'message' => 'Payment processed successfully (DEMO MODE)',
@@ -257,7 +264,6 @@ function processDemoPayment($db, $transaction_id, $request_id, $amount, $phone_n
             'amount' => $amount,
             'phone' => $phone_number
         ];
-        
     } catch (Exception $e) {
         $db->rollBack();
         error_log("Demo payment error: " . $e->getMessage());
@@ -269,19 +275,20 @@ function processDemoPayment($db, $transaction_id, $request_id, $amount, $phone_n
 // REAL M-PESA STK PUSH
 // ===================================================================
 
-function processRealMpesaPayment($db, $transaction_id, $amount, $phone_number) {
+function processRealMpesaPayment($db, $transaction_id, $amount, $phone_number)
+{
     try {
         // Get access token
         $access_token = getMpesaAccessToken();
-        
+
         if (!$access_token) {
             throw new Exception('Failed to get M-Pesa access token');
         }
-        
+
         // Prepare STK Push request
         $timestamp = date('YmdHis');
         $password = base64_encode(MPESA_SHORTCODE . MPESA_PASSKEY . $timestamp);
-        
+
         $stk_data = [
             'BusinessShortCode' => MPESA_SHORTCODE,
             'Password' => $password,
@@ -295,7 +302,7 @@ function processRealMpesaPayment($db, $transaction_id, $amount, $phone_number) {
             'AccountReference' => 'StrathShare',
             'TransactionDesc' => 'Payment for service - Trans #' . $transaction_id
         ];
-        
+
         // Send STK Push
         $curl = curl_init(MPESA_STK_URL);
         curl_setopt_array($curl, [
@@ -308,13 +315,13 @@ function processRealMpesaPayment($db, $transaction_id, $amount, $phone_number) {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_SSL_VERIFYPEER => false
         ]);
-        
+
         $response = curl_exec($curl);
         $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
-        
+
         $result = json_decode($response, true);
-        
+
         if (isset($result['ResponseCode']) && $result['ResponseCode'] == '0') {
             // STK Push sent successfully
             // Update transaction with checkout request ID
@@ -328,7 +335,7 @@ function processRealMpesaPayment($db, $transaction_id, $amount, $phone_number) {
             $stmt->bindParam(':merchant_id', $result['MerchantRequestID']);
             $stmt->bindParam(':trans_id', $transaction_id);
             $stmt->execute();
-            
+
             return [
                 'success' => true,
                 'message' => 'STK Push sent! Check your phone to complete payment.',
@@ -339,16 +346,15 @@ function processRealMpesaPayment($db, $transaction_id, $amount, $phone_number) {
         } else {
             throw new Exception($result['errorMessage'] ?? 'STK Push failed');
         }
-        
     } catch (Exception $e) {
         error_log("Real M-Pesa error: " . $e->getMessage());
-        
+
         // Update transaction to failed
         $fail_query = "UPDATE transactions SET status = 'failed' WHERE transaction_id = :trans_id";
         $fail_stmt = $db->prepare($fail_query);
         $fail_stmt->bindParam(':trans_id', $transaction_id);
         $fail_stmt->execute();
-        
+
         return [
             'success' => false,
             'message' => 'M-Pesa error: ' . $e->getMessage()
@@ -360,28 +366,30 @@ function processRealMpesaPayment($db, $transaction_id, $amount, $phone_number) {
 // HELPER FUNCTIONS
 // ===================================================================
 
-function getMpesaAccessToken() {
+function getMpesaAccessToken()
+{
     $credentials = base64_encode(MPESA_CONSUMER_KEY . ':' . MPESA_CONSUMER_SECRET);
-    
+
     $curl = curl_init(MPESA_AUTH_URL);
     curl_setopt_array($curl, [
         CURLOPT_HTTPHEADER => ['Authorization: Basic ' . $credentials],
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_SSL_VERIFYPEER => false
     ]);
-    
+
     $response = curl_exec($curl);
     curl_close($curl);
-    
+
     $data = json_decode($response, true);
-    
+
     return $data['access_token'] ?? null;
 }
 
-function sanitizePhoneNumber($phone) {
+function sanitizePhoneNumber($phone)
+{
     // Remove any non-numeric characters
     $phone = preg_replace('/[^0-9]/', '', $phone);
-    
+
     // Convert 07... to 2547...
     if (substr($phone, 0, 2) === '07') {
         $phone = '254' . substr($phone, 1);
@@ -394,16 +402,17 @@ function sanitizePhoneNumber($phone) {
     if (substr($phone, 0, 4) === '+254') {
         $phone = substr($phone, 1);
     }
-    
+
     return $phone;
 }
 
-function logPayment($transaction_id, $phone, $amount, $receipt, $status, $is_demo = false) {
+function logPayment($transaction_id, $phone, $amount, $receipt, $status, $is_demo = false)
+{
     $log_dir = __DIR__ . '/../logs/';
     if (!file_exists($log_dir)) {
         mkdir($log_dir, 0755, true);
     }
-    
+
     $log_file = $log_dir . 'payments_' . date('Y-m-d') . '.log';
     $mode = $is_demo ? 'DEMO' : 'LIVE';
     $log_entry = sprintf(
@@ -416,7 +425,6 @@ function logPayment($transaction_id, $phone, $amount, $receipt, $status, $is_dem
         $receipt,
         $status
     );
-    
+
     @file_put_contents($log_file, $log_entry, FILE_APPEND);
 }
-?>

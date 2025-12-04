@@ -80,6 +80,12 @@ class EmailNotifier
         try {
             // Server settings
             $this->mailer->isSMTP();
+            
+            $this->mailer->SMTPDebug = SMTP::DEBUG_SERVER;
+            $this->mailer->Debugoutput = function ($str, $level) {
+                error_log("PHPMailer [$level]: $str");
+            };
+            
             $this->mailer->Host = $this->smtp_host;
             $this->mailer->SMTPAuth = true;
             $this->mailer->Username = $this->smtp_username;
