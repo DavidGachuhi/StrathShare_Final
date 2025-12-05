@@ -1,13 +1,5 @@
-// =====================================================
-// STRATHSHARE - COMPLETE STUDENT DASHBOARD (app.js)
-// Sean Sabana (220072) & David Mucheru Gachuhi (220235)
-// Strathmore University - December 2025
-// =====================================================
-// SEAN & DAVID — FINAL VERSION 2025
-
-// =====================================================
 // GLOBAL STATE & CONFIGURATION
-// =====================================================
+
 let currentUser = null;
 let currentView = 'discover';
 let skills = [];
@@ -18,9 +10,8 @@ let messageRefreshInterval = null;
 
 const API_BASE = 'api/';
 
-// =====================================================
 // INITIALIZATION
-// =====================================================
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('StrathShare initializing...');
     checkAuth();

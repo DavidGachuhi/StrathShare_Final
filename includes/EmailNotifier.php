@@ -1,29 +1,6 @@
 <?php
 
-/**
- * ===================================================================
- * STRATHSHARE - EMAIL NOTIFICATION SYSTEM
- * Sean Sabana (220072) & David Mucheru Gachuhi (220235)
- * Strathmore University - December 2025
- * ===================================================================
- * 
- * This class handles all email notifications using PHPMailer.
- * 
- * SETUP INSTRUCTIONS:
- * 1. Download PHPMailer from: https://github.com/PHPMailer/PHPMailer
- * 2. Extract to: includes/PHPMailer/
- * 3. Update SMTP credentials below with your Gmail app password
- * 4. Enable "Less secure apps" or create App Password in Google Account
- * 
- * To create Gmail App Password:
- * 1. Go to Google Account > Security
- * 2. Enable 2-Factor Authentication
- * 3. Go to App Passwords
- * 4. Create new app password for "Mail"
- * 5. Copy the 16-character password here
- */
 
-// SEAN & DAVID — FINAL VERSION 2025
 
 // Include PHPMailer files
 // If using Composer: require 'vendor/autoload.php';

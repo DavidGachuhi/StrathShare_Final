@@ -1,12 +1,5 @@
 <?php
-/**
- * ===================================================================
- * API: Mark Notification as Read
- * ===================================================================
- * Sean Sabana (220072) & David Mucheru Gachuhi (220235)
- */
 
-// SEAN & DAVID — FINAL VERSION 2025
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');

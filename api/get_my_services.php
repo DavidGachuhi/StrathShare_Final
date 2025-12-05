@@ -1,10 +1,5 @@
 <?php
-// =====================================================
-// STRATHSHARE API - Get My Services
-// Sean Sabana (220072) & David Mucheru Gachuhi (220235)
-// Strathmore University - December 2025
-// =====================================================
-// SEAN & DAVID — FINAL VERSION 2025
+
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');

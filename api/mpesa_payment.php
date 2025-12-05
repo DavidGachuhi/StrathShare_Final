@@ -1,24 +1,10 @@
 <?php
 
 /**
- * ===================================================================
  * STRATHSHARE - M-PESA PAYMENT INTEGRATION
- * Sean Sabana (220072) & David Mucheru Gachuhi (220235)
- * Strathmore University - December 2025
- * ===================================================================
- * 
- * This file handles M-Pesa STK Push payments.
- * Currently configured for DEMO MODE - simulates payments for testing.
- * 
- * TO SWITCH TO REAL M-PESA:
- * 1. Set MPESA_DEMO_MODE to false below
- * 2. Register at https://developer.safaricom.co.ke/
- * 3. Create an app and get your credentials
- * 4. Update the credentials below
- * 5. Set up ngrok or a public callback URL
  */
 
-// SEAN & DAVID — FINAL VERSION 2025
+
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -32,9 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once '../config/database.php';
 require_once '../includes/EmailNotifier.php';
 
-// ===================================================================
+
 // M-PESA CONFIGURATION
-// ===================================================================
+
 
 // DEMO MODE - Set to false to use real M-Pesa API
 define('MPESA_DEMO_MODE', true);
@@ -61,9 +47,8 @@ if (MPESA_ENV === 'sandbox') {
     define('MPESA_STK_URL', 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest');
 }
 
-// ===================================================================
 // MAIN HANDLER
-// ===================================================================
+
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
@@ -162,9 +147,9 @@ try {
     echo json_encode(['success' => false, 'message' => 'Database error occurred']);
 }
 
-// ===================================================================
+
 // DEMO PAYMENT PROCESSING
-// ===================================================================
+
 
 function processDemoPayment($db, $transaction_id, $request_id, $amount, $phone_number, $request)
 {

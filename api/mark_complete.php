@@ -1,14 +1,5 @@
 <?php
-/**
- * ===================================================================
- * API: Mark Request as Complete
- * Provider marks that they've finished the work
- * Status: in_progress (or assigned) → awaiting_payment
- * ===================================================================
- * Sean Sabana (220072) & David Mucheru Gachuhi (220235)
- */
 
-// SEAN & DAVID — FINAL VERSION 2025
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');

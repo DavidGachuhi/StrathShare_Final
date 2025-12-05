@@ -1,21 +1,5 @@
 <?php
-/**
- * ===================================================================
- * STRATHSHARE - DATABASE CONFIGURATION
- * Sean Sabana (220072) & David Mucheru Gachuhi (220235)
- * Strathmore University - December 2025
- * ===================================================================
- * 
- * This file handles all database connections for the application.
- * Uses PDO for secure prepared statements.
- * 
- * SETUP INSTRUCTIONS:
- * 1. Create database 'strathshare_db' in phpMyAdmin
- * 2. Import sql/strathshare_complete.sql
- * 3. Update credentials below if needed (default XAMPP: root, no password)
- */
 
-// SEAN & DAVID — FINAL VERSION 2025
 
 // Database credentials - UPDATE THESE IF YOUR SETUP IS DIFFERENT
 define('DB_HOST', 'localhost');

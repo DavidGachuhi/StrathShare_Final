@@ -1,13 +1,5 @@
 <?php
-/**
- * ===================================================================
- * API: Admin - Suspend/Activate User
- * Toggles user account status between active and suspended
- * ===================================================================
- * Sean Sabana (220072) & David Mucheru Gachuhi (220235)
- */
 
-// SEAN & DAVID — FINAL VERSION 2025
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');

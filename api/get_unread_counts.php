@@ -1,13 +1,5 @@
 <?php
-/**
- * ===================================================================
- * API: Get Unread Counts
- * Returns unread message count and notification count for badges
- * ===================================================================
- * Sean Sabana (220072) & David Mucheru Gachuhi (220235)
- */
 
-// SEAN & DAVID — FINAL VERSION 2025
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
